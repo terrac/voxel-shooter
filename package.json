@@ -1,0 +1,31 @@
+{
+  "name": "pursuit3",
+  "description": "",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/terra/pursuit"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "ndarray": "^1.0.18",
+    "voxel-artpacks": "^1.0.0",
+    "voxel-chunkborder": "^0.5.0",
+    "voxel-decorative": "^0.1.1",
+    "voxel-engine-stackgl": "^2.0.0",
+    "voxel-fullscreen": "^0.2.0",
+    "voxel-glass": "^1.0.1",
+    "voxel-modal-dialog": "^1.0.1",
+    "voxel-vr": "^0.1.1",
+    "voxel-webview": "^1.0.0"
+  },
+  "engine": {
+    "node": "0.12.x"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1"
+  },
+  "scripts": {
+    "start": "browserify index.js -o dist/bundle.js\nnode server.js"
+  }
+}
