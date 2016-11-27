@@ -63,18 +63,118 @@
 
 </head>
 
-<body>
 
-  <script>
-  </script>
+<body translate="no" >
   <script src="bundle.js"></script>
 
   <div id="container"></div>
 
 
-  <script>
-  </script>
   <div id="crosshair"><img src="crosshair4.png"></div>
+
+  <body ng-app="app" ng-controller="ChatCtrl">
+    <div class='message'>
+   <ul class="collection">
+     <li class="collection-item avatar" ng-repeat="message in messages">
+       <span>#{{ message.sender_uuid }}<p> {{ message.content }}</p></span>
+       
+     </li>
+   </ul> 
+   <footer class="teal">
+     <form ng-submit="sendMessage()" class="container">
+       <div class="row">
+         <div class="input-field col s10">
+           <i class="prefix mdi-communication-chat"></i>
+           <input ng-model="messageContent" type="text" placeholder="Type your message" >
+      
+         </div>
+       </div>
+      </form>
+   </footer>
+   </div>
+</body>
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src='//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js'></script>
+<script src='//cdn.pubnub.com/pubnub-3.7.21.js'></script>
+<script src='//cdn.pubnub.com/sdk/pubnub-angular/pubnub-angular-3.2.1.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js'></script>
+
+<script src='//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.2.0/lodash.js'></script>
+
+    <script>
+    angular
+.module('app', ['pubnub.angular.service'])
+
+.controller('ChatCtrl', ['$scope', 'Pubnub', function($scope, Pubnub) {
+    $scope.messages = [];
+    $scope.channel = 'messages-channel';
+
+    $scope.messageContent = '';
+    // Generating a random uuid between 1 and 100 using utility function from lodash library.
+    $scope.uuid = _.random(1000000).toString();
+ 
+    // Please signup to PubNub to use your own keys: https://admin.pubnub.com/
+    Pubnub.init({
+        publish_key: 'pub-c-48fa6bf0-1631-4b24-8259-832def551a00',
+        subscribe_key: 'sub-c-c8af1016-b4c4-11e6-9ab5-0619f8945a4f',
+        ssl: true,
+        uuid: $scope.uuid
+    });
+
+    // Fetching a uniq random avatar from the robohash.org service.
+    $scope.avatarUrl = function(uuid) {
+        return '//robohash.org/' + uuid + '?set=set2&bgset=bg2&size=70x70';
+    };
+
+    // Send the messages over PubNub Network
+    $scope.sendMessage = function() {
+       // Don't send an empty message 
+       if (!$scope.messageContent ||
+            $scope.messageContent === '') {
+            return;
+        }
+        Pubnub.publish({
+            channel: $scope.channel,
+            message: {
+                content: $scope.messageContent,
+                sender_uuid: $scope.uuid,
+                date: new Date()
+            },
+            callback: function(m) {
+                console.log(m);
+            }
+        });
+        // Reset the messageContent input
+        $scope.messageContent = '';
+
+    }
+
+    // Subscribe to messages channel
+    Pubnub.subscribe({
+        channel: $scope.channel,
+        triggerEvents: ['callback']
+    });
+
+    // Make it possible to scrollDown to the bottom of the messages container
+    $scope.scrollDown = function(time) {
+        var $elem = $('.collection');
+        $('body').animate({
+            scrollTop: $elem.height()
+        }, time);
+    };
+$scope.scrollDown(400);
+// Listenning to messages sent.
+    $scope.$on(Pubnub.getMessageEventNameFor($scope.channel), function(ngEvent, m) {
+        $scope.$apply(function() {
+            $scope.messages.push(m)
+        });
+        $scope.scrollDown(400);
+    });
+}]);
+  </script>
+
+  
+  
 
 </body>
 
